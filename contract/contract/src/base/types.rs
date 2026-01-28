@@ -32,6 +32,7 @@ pub struct MultiSigConfig {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PoolConfig {
     pub name: String,
+    pub description: String,
     pub target_amount: i128,
     pub is_private: bool,
     pub duration: u64,
@@ -59,6 +60,12 @@ impl PoolConfig {
     pub fn validate(&self) {
         // Name must not be empty
         assert!(!self.name.is_empty(), "pool name must not be empty");
+
+        // Description validation
+        assert!(
+            self.description.len() <= MAX_DESCRIPTION_LENGTH,
+            "description too long"
+        );
 
         // Target amount must be strictly positive
         assert!(self.target_amount > 0, "target_amount must be > 0");
@@ -168,6 +175,7 @@ mod tests {
         let env = Env::default();
         let cfg = PoolConfig {
             name: String::from_str(&env, "Education Fund"),
+            description: String::from_str(&env, "Fund for student education materials"),
             target_amount: 1_000_000,
             is_private: false,
             duration: 30 * 24 * 60 * 60,
@@ -183,6 +191,7 @@ mod tests {
         let env = Env::default();
         let cfg = PoolConfig {
             name: String::from_str(&env, "Invalid Target"),
+            description: String::from_str(&env, "Description"),
             target_amount: 0,
             is_private: false,
             duration: 30 * 24 * 60 * 60,
