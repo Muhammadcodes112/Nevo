@@ -2785,27 +2785,42 @@ fn test_get_top_contributor_for_campaign() {
 
     // First donation: donor1 gives 100 XLM
     client.donate(&campaign_id, &donor1, &token_address, &100i128);
-    assert_eq!(client.get_top_contributor_for_campaign(&campaign_id), donor1);
+    assert_eq!(
+        client.get_top_contributor_for_campaign(&campaign_id),
+        donor1
+    );
 
     // Second donation: donor2 gives 500 XLM (new top contributor)
     client.donate(&campaign_id, &donor2, &token_address, &500i128);
-    assert_eq!(client.get_top_contributor_for_campaign(&campaign_id), donor2);
+    assert_eq!(
+        client.get_top_contributor_for_campaign(&campaign_id),
+        donor2
+    );
 
     // Third donation: donor3 gives 250 XLM (donor2 still top)
     client.donate(&campaign_id, &donor3, &token_address, &250i128);
-    assert_eq!(client.get_top_contributor_for_campaign(&campaign_id), donor2);
+    assert_eq!(
+        client.get_top_contributor_for_campaign(&campaign_id),
+        donor2
+    );
 
     // Fourth donation: donor1 gives 400 more (single donation is 400, less than current max 500)
     // donor2 remains top since 400 < 500
     client.donate(&campaign_id, &donor1, &token_address, &400i128);
-    assert_eq!(client.get_top_contributor_for_campaign(&campaign_id), donor2);
+    assert_eq!(
+        client.get_top_contributor_for_campaign(&campaign_id),
+        donor2
+    );
 
     // Fifth donation: donor1 gives 600 (single donation exceeds current max)
     // donor1 becomes new top
     let donor1_new = Address::generate(&env);
     token_admin_client.mint(&donor1_new, &10000i128);
     client.donate(&campaign_id, &donor1_new, &token_address, &600i128);
-    assert_eq!(client.get_top_contributor_for_campaign(&campaign_id), donor1_new);
+    assert_eq!(
+        client.get_top_contributor_for_campaign(&campaign_id),
+        donor1_new
+    );
 }
 
 #[test]
