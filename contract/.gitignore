@@ -5,4 +5,7 @@ target
 .soroban
 .stellar
 
+# Test snapshots (auto-generated)
+contract/test_snapshots
+
 
