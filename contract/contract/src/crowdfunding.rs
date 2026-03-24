@@ -1505,7 +1505,7 @@ impl CrowdfundingTrait for CrowdfundingContract {
 
     fn withdraw_platform_fees(
         env: Env,
-        admin: Address,
+        to: Address,
         amount: i128,
     ) -> Result<(), CrowdfundingError> {
         let stored_admin: Address = env
@@ -1514,11 +1514,7 @@ impl CrowdfundingTrait for CrowdfundingContract {
             .get(&StorageKey::Admin)
             .ok_or(CrowdfundingError::NotInitialized)?;
 
-        if admin != stored_admin {
-            return Err(CrowdfundingError::Unauthorized);
-        }
-
-        admin.require_auth();
+        stored_admin.require_auth();
 
         if amount <= 0 {
             return Err(CrowdfundingError::InvalidAmount);
@@ -1544,13 +1540,13 @@ impl CrowdfundingTrait for CrowdfundingContract {
 
         use soroban_sdk::token;
         let token_client = token::Client::new(&env, &token_address);
-        token_client.transfer(&env.current_contract_address(), &admin, &amount);
+        token_client.transfer(&env.current_contract_address(), &to, &amount);
 
         env.storage()
             .instance()
             .set(&platform_fees_key, &(current_fees - amount));
 
-        events::platform_fees_withdrawn(&env, admin, amount);
+        events::platform_fees_withdrawn(&env, to, amount);
 
         Ok(())
     }
