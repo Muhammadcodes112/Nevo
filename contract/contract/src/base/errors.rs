@@ -87,9 +87,18 @@ mod tests {
 
     #[test]
     fn event_errors_are_distinct() {
-        assert_ne!(SecondCrowdfundingError::EventNotFound, SecondCrowdfundingError::EventSoldOut);
-        assert_ne!(SecondCrowdfundingError::EventSoldOut, SecondCrowdfundingError::EventExpired);
-        assert_ne!(SecondCrowdfundingError::EventNotFound, SecondCrowdfundingError::EventExpired);
+        assert_ne!(
+            SecondCrowdfundingError::EventNotFound,
+            SecondCrowdfundingError::EventSoldOut
+        );
+        assert_ne!(
+            SecondCrowdfundingError::EventSoldOut,
+            SecondCrowdfundingError::EventExpired
+        );
+        assert_ne!(
+            SecondCrowdfundingError::EventNotFound,
+            SecondCrowdfundingError::EventExpired
+        );
     }
 
     #[test]
