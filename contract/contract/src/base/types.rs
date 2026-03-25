@@ -265,18 +265,19 @@ pub enum StorageKey {
     EmergencyWithdrawal,
     CrowdfundingToken,
     CreationFee,
-    PlatformFeeBps,
     VerifiedCause(Address),
     PlatformFees,
     GlobalTotalRaised,
     CampaignCancelled(BytesN<32>),
+    CampaignClaimed(BytesN<32>),
     EmergencyContact,
     CampaignFeeHistory(BytesN<32>),
     Blacklist(Address),
-
     ReentrancyLock(u64),
     EmergencyWithdrawalLock,
     PoolCreator(u64),
+    EventFeeTreasury,
+    PlatformFeeBps,
     // Per-pool revenue split: tokens destined for the event creator
     EventPool(u64),
     // Per-pool revenue split: tokens accumulated as platform fee
