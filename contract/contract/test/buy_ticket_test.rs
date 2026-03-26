@@ -3,7 +3,10 @@
 use soroban_sdk::{testutils::Address as _, token, Address, Env};
 
 use crate::{
-    base::{errors::CrowdfundingError, types::{PoolConfig, StorageKey}},
+    base::{
+        errors::CrowdfundingError,
+        types::{PoolConfig, StorageKey},
+    },
     crowdfunding::{CrowdfundingContract, CrowdfundingContractClient},
 };
 use soroban_sdk::{testutils::Events, Symbol, TryFromVal};
@@ -100,15 +103,19 @@ fn test_buy_ticket_full_success() {
     env.as_contract(&client.address, || {
         let storage = env.storage().instance();
 
-        let saved_event_amount: i128 = storage
-            .get(&StorageKey::EventPool(pool_id))
-            .unwrap_or(0);
-        assert_eq!(saved_event_amount, event_amount, "EventPool storage updated");
+        let saved_event_amount: i128 = storage.get(&StorageKey::EventPool(pool_id)).unwrap_or(0);
+        assert_eq!(
+            saved_event_amount, event_amount,
+            "EventPool storage updated"
+        );
 
         let saved_fee_amount: i128 = storage
             .get(&StorageKey::EventPlatformFees(pool_id))
             .unwrap_or(0);
-        assert_eq!(saved_fee_amount, fee_amount, "EventPlatformFees storage updated");
+        assert_eq!(
+            saved_fee_amount, fee_amount,
+            "EventPlatformFees storage updated"
+        );
 
         let has_ticket: bool = storage
             .get(&StorageKey::UserTicket(pool_id, buyer.clone()))
@@ -118,27 +125,33 @@ fn test_buy_ticket_full_success() {
 
     // 7. Assertions - Events
     let all_events = env.events().all();
-    
+
     // We expect at least the ticket_sold event.
     // In this environment, we previously saw 2 events from create_pool.
     // So we look for the ticket_sold event among all events.
     let ticket_sold_event = all_events.iter().find(|e| {
         let topics = &e.1;
-        if topics.len() < 3 { return false; }
-        
+        if topics.len() < 3 {
+            return false;
+        }
+
         let event_name = Symbol::try_from_val(&env, &topics.get(0).unwrap());
         let event_pool_id = u64::try_from_val(&env, &topics.get(1).unwrap());
         let event_buyer = Address::try_from_val(&env, &topics.get(2).unwrap());
-        
-        event_name == Ok(Symbol::new(&env, "ticket_sold")) &&
-        event_pool_id == Ok(pool_id) &&
-        event_buyer == Ok(buyer.clone())
+
+        event_name == Ok(Symbol::new(&env, "ticket_sold"))
+            && event_pool_id == Ok(pool_id)
+            && event_buyer == Ok(buyer.clone())
     });
 
     if let Some(event) = ticket_sold_event {
         let data = &event.2;
         let decoded: Result<(i128, i128, i128), _> = TryFromVal::try_from_val(&env, data);
-        assert_eq!(decoded, Ok((price, event_amount, fee_amount)), "event data matches");
+        assert_eq!(
+            decoded,
+            Ok((price, event_amount, fee_amount)),
+            "event data matches"
+        );
     }
 }
 
