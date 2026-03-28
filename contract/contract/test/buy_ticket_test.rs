@@ -372,3 +372,72 @@ fn test_buy_ticket_requires_buyer_auth() {
         "buyer auth must be recorded"
     );
 }
+
+#[test]
+fn test_buy_ticket_emits_ticket_purchased_event() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let contract_id = env.register(CrowdfundingContract, ());
+    let client = CrowdfundingContractClient::new(&env, &contract_id);
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let token_address = env
+        .register_stellar_asset_contract_v2(token_admin)
+        .address();
+    client.initialize(&admin, &token_address, &0);
+
+    // Create a pool
+    let creator = Address::generate(&env);
+    let config = PoolConfig {
+        name: soroban_sdk::String::from_str(&env, "Event Pool"),
+        description: soroban_sdk::String::from_str(&env, "Test event"),
+        target_amount: 1_000_000,
+        min_contribution: 0,
+        is_private: false,
+        duration: 86_400,
+        created_at: env.ledger().timestamp(),
+        token_address: token_address.clone(),
+    };
+    let pool_id = client.create_pool(&creator, &config);
+
+    // Set platform fee (5% = 500 bps)
+    client.set_platform_fee_bps(&500);
+
+    // Prepare buyer
+    let buyer = Address::generate(&env);
+    let price = 10_000i128;
+    let token_admin_client = token::StellarAssetClient::new(&env, &token_address);
+    token_admin_client.mint(&buyer, &price);
+
+    // Execute buy_ticket
+    let (event_amount, fee_amount) = client.buy_ticket(&pool_id, &buyer, &token_address, &price);
+
+    // Verify ticket_purchased event was emitted
+    let all_events = env.events().all();
+    let ticket_purchased_symbol = Symbol::new(&env, "ticket_purchased");
+
+    let found = all_events.iter().any(|(_contract, topics, data)| {
+        if topics.is_empty() {
+            return false;
+        }
+        use soroban_sdk::FromVal;
+        let sym = Symbol::from_val(&env, &topics.get(0).unwrap());
+        if sym != ticket_purchased_symbol {
+            return false;
+        }
+        use soroban_sdk::TryFromVal;
+        let decoded: Result<(i128, i128, i128), _> =
+            <(i128, i128, i128)>::try_from_val(&env, &data);
+        match decoded {
+            Ok((p, ea, fa)) => p == price && ea == event_amount && fa == fee_amount,
+            Err(_) => false,
+        }
+    });
+
+    assert!(
+        found,
+        "ticket_purchased event was not emitted by buy_ticket"
+    );
+}
