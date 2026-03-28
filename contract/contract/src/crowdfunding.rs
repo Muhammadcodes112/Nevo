@@ -376,7 +376,10 @@ impl CrowdfundingTrait for CrowdfundingContract {
 
     fn is_ticket_buyer(env: Env, pool_id: u64, buyer: Address) -> bool {
         let user_ticket_key = StorageKey::UserTicket(pool_id, buyer);
-        env.storage().instance().get(&user_ticket_key).unwrap_or(false)
+        env.storage()
+            .instance()
+            .get(&user_ticket_key)
+            .unwrap_or(false)
     }
 
     fn get_global_raised_total(env: Env) -> i128 {
