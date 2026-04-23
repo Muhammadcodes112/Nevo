@@ -6,11 +6,12 @@ use soroban_sdk::{
 };
 
 use crate::crowdfunding::{CrowdfundingContract, CrowdfundingContractClient};
+use crate::base::errors::CrowdfundingError;
 
 // Import the compiled WASM of this same contract to use as the "new" version
 // in the upgrade integration test.
 mod upgraded_contract {
-    soroban_sdk::contractimport!(file = "../target/wasm32v1-none/release/hello_world.wasm");
+    soroban_sdk::contractimport!(file = "../target/wasm32-unknown-unknown/release/hello_world.wasm");
 }
 
 fn setup(env: &Env) -> (CrowdfundingContractClient<'_>, Address) {
