@@ -40,7 +40,27 @@ pub struct PoolConfig {
     pub duration: u64,
     pub created_at: u64,
     pub token_address: Address,
+    /// The address authorized to approve or reject scholarship applications for this pool.
     pub validator: Address,
+}
+
+/// Status of a scholarship application.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[repr(u32)]
+pub enum ApplicationStatus {
+    Pending = 0,
+    Approved = 1,
+    Rejected = 2,
+}
+
+/// A scholarship application submitted to a pool.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ScholarshipApplication {
+    pub pool_id: u64,
+    pub applicant: Address,
+    pub status: ApplicationStatus,
 }
 
 #[contracttype]
@@ -338,6 +358,8 @@ pub enum StorageKey {
     PoolClaimed(u64),
     // Per-event metrics (tickets sold, etc.)
     EventMetrics(BytesN<32>),
+    // Scholarship application keyed by (pool_id, applicant)
+    ScholarshipApplication(u64, Address),
     // Locked token balance deposited by the sponsor at pool creation
     PoolBalance(u64),
 }
